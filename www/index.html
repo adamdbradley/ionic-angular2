@@ -1,0 +1,27 @@
+<!doctype html>
+<html>
+<head>
+  <title>Hello Ionic 2.0</title>
+</head>
+<body>
+
+  <hello-app>
+    Loading...
+  </hello-app>
+
+  <script src="/lib/deps/traceur-runtime.js"></script>
+  <script src="/lib/rtts_assert/rtts_assert.js"></script>
+  <script src="/lib/deps/es6-module-loader-sans-promises.src.js"></script>
+  <script src="/lib/deps/zone.js"></script>
+  <script src="/lib/deps/long-stack-trace-zone.js"></script>
+  <script src="/lib/deps/system.src.js"></script>
+  <script src="/lib/deps/extension-register.js"></script>
+  <script src="/lib/deps/runtime_paths.js"></script>
+  <script>
+    System.import('js/index').then(function(m) {
+      m.main();
+    }, console.log.bind(console));
+  </script>
+
+</body>
+</html>
