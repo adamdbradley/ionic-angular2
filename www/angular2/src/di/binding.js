@@ -119,6 +119,11 @@ System.register(["angular2/src/facade/lang", "angular2/src/facade/collection", "
               return value;
             }), [], false);
           },
+          toAlias: function(aliasToken) {
+            return new Binding(Key.get(this.token), (function(aliasInstance) {
+              return aliasInstance;
+            }), [new Dependency(Key.get(aliasToken), false, false, [])], false);
+          },
           toFactory: function(factoryFunction) {
             var dependencies = arguments[1] !== (void 0) ? arguments[1] : null;
             return new Binding(Key.get(this.token), factoryFunction, this._constructDependencies(factoryFunction, dependencies), false);

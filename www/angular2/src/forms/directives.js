@@ -83,10 +83,10 @@ System.register(["angular2/core", "angular2/src/facade/dom", "angular2/src/facad
         };
         return ($traceurRuntime.createClass)(DefaultControlValueAccessor, {
           readValue: function(el) {
-            return el.value;
+            return DOM.getValue(el);
           },
           writeValue: function(el, value) {
-            el.value = value;
+            DOM.setValue(el, value);
           }
         }, {}, $__super);
       }(ControlValueAccessor));
@@ -99,10 +99,10 @@ System.register(["angular2/core", "angular2/src/facade/dom", "angular2/src/facad
         };
         return ($traceurRuntime.createClass)(CheckboxControlValueAccessor, {
           readValue: function(el) {
-            return el.checked;
+            return DOM.getChecked(el);
           },
           writeValue: function(el, value) {
-            el.checked = value;
+            DOM.setChecked(el, value);
           }
         }, {}, $__super);
       }(ControlValueAccessor));

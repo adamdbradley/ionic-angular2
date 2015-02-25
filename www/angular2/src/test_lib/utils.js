@@ -18,7 +18,7 @@ System.register(["angular2/src/facade/collection", "angular2/src/facade/dom", "a
     DOM.dispatchEvent(element, DOM.createEvent(eventType));
   }
   function el(html) {
-    return DOM.firstChild(DOM.createTemplate(html).content);
+    return DOM.firstChild(DOM.content(DOM.createTemplate(html)));
   }
   $__export("queryView", queryView);
   $__export("dispatchEvent", dispatchEvent);

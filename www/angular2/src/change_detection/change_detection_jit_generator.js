@@ -1,4 +1,4 @@
-System.register(["angular2/src/facade/lang", "angular2/src/facade/collection", "./parser/context_with_variable_bindings", "./abstract_change_detector", "./change_detection_util", "./proto_change_detector"], function($__export) {
+System.register(["angular2/src/facade/lang", "angular2/src/facade/collection", "./parser/context_with_variable_bindings", "./abstract_change_detector", "./change_detection_util", "./proto_record"], function($__export) {
   "use strict";
   var isPresent,
       isBlank,
@@ -19,25 +19,22 @@ System.register(["angular2/src/facade/lang", "angular2/src/facade/collection", "
       RECORD_TYPE_INVOKE_CLOSURE,
       RECORD_TYPE_PRIMITIVE_OP,
       RECORD_TYPE_KEYED_ACCESS,
-      RECORD_TYPE_INVOKE_FORMATTER,
-      RECORD_TYPE_STRUCTURAL_CHECK,
+      RECORD_TYPE_PIPE,
       RECORD_TYPE_INTERPOLATE,
-      ProtoChangeDetector,
       ABSTRACT_CHANGE_DETECTOR,
       UTIL,
       DISPATCHER_ACCESSOR,
-      FORMATTERS_ACCESSOR,
+      PIPE_REGISTRY_ACCESSOR,
       PROTOS_ACCESSOR,
       CHANGE_LOCAL,
       CHANGES_LOCAL,
       TEMP_LOCAL,
-      PIPE_REGISTRY_ACCESSOR,
       ChangeDetectorJITGenerator;
   function typeTemplate(type, cons, detectChanges, setContext) {
-    return ("\n" + cons + "\n" + detectChanges + "\n" + setContext + ";\n\nreturn function(dispatcher, formatters, pipeRegistry) {\n  return new " + type + "(dispatcher, formatters, pipeRegistry, protos);\n}\n");
+    return ("\n" + cons + "\n" + detectChanges + "\n" + setContext + ";\n\nreturn function(dispatcher, pipeRegistry) {\n  return new " + type + "(dispatcher, pipeRegistry, protos);\n}\n");
   }
   function constructorTemplate(type, fieldsDefinitions) {
-    return ("\nvar " + type + " = function " + type + "(dispatcher, formatters, pipeRegistry, protos) {\n" + ABSTRACT_CHANGE_DETECTOR + ".call(this);\n" + DISPATCHER_ACCESSOR + " = dispatcher;\n" + FORMATTERS_ACCESSOR + " = formatters;\n" + PIPE_REGISTRY_ACCESSOR + " = pipeRegistry;\n" + PROTOS_ACCESSOR + " = protos;\n" + fieldsDefinitions + "\n}\n\n" + type + ".prototype = Object.create(" + ABSTRACT_CHANGE_DETECTOR + ".prototype);\n");
+    return ("\nvar " + type + " = function " + type + "(dispatcher, pipeRegistry, protos) {\n" + ABSTRACT_CHANGE_DETECTOR + ".call(this);\n" + DISPATCHER_ACCESSOR + " = dispatcher;\n" + PIPE_REGISTRY_ACCESSOR + " = pipeRegistry;\n" + PROTOS_ACCESSOR + " = protos;\n" + fieldsDefinitions + "\n}\n\n" + type + ".prototype = Object.create(" + ABSTRACT_CHANGE_DETECTOR + ".prototype);\n");
   }
   function setContextTemplate(type) {
     return ("\n" + type + ".prototype.setContext = function(context) {\n  this.context = context;\n}\n");
@@ -51,8 +48,8 @@ System.register(["angular2/src/facade/lang", "angular2/src/facade/collection", "
   function notifyTemplate(index) {
     return ("\nif (" + CHANGES_LOCAL + " && " + CHANGES_LOCAL + ".length > 0) {\n  if(throwOnChange) " + UTIL + ".throwOnChange(" + PROTOS_ACCESSOR + "[" + index + "], " + CHANGES_LOCAL + "[0]);\n  " + DISPATCHER_ACCESSOR + ".onRecordChange(" + PROTOS_ACCESSOR + "[" + index + "].directiveMemento, " + CHANGES_LOCAL + ");\n  " + CHANGES_LOCAL + " = null;\n}\n");
   }
-  function pipeCheckTemplate(context, pipe, value, change, addRecord, notify) {
-    return ("\nif (" + pipe + " === " + UTIL + ".unitialized() || !" + pipe + ".supports(" + context + ")) {\n  " + pipe + " = " + PIPE_REGISTRY_ACCESSOR + ".get('[]', " + context + ");\n}\n\n" + CHANGE_LOCAL + " = " + pipe + ".transform(" + context + ");\nif (! " + UTIL + ".noChangeMarker(" + CHANGE_LOCAL + ")) {\n  " + value + " = " + CHANGE_LOCAL + ";\n  " + change + " = true;\n  " + addRecord + "\n}\n" + notify + "\n");
+  function pipeCheckTemplate(context, pipe, pipeType, value, change, addRecord, notify) {
+    return ("\nif (" + pipe + " === " + UTIL + ".unitialized() || !" + pipe + ".supports(" + context + ")) {\n  " + pipe + " = " + PIPE_REGISTRY_ACCESSOR + ".get('" + pipeType + "', " + context + ");\n}\n\n" + CHANGE_LOCAL + " = " + pipe + ".transform(" + context + ");\nif (! " + UTIL + ".noChangeMarker(" + CHANGE_LOCAL + ")) {\n  " + value + " = " + CHANGE_LOCAL + ";\n  " + change + " = true;\n  " + addRecord + "\n}\n" + notify + "\n");
   }
   function referenceCheckTemplate(assignment, newValue, oldValue, change, addRecord, notify) {
     return ("\n" + assignment + "\nif (" + newValue + " !== " + oldValue + " || (" + newValue + " !== " + newValue + ") && (" + oldValue + " !== " + oldValue + ")) {\n  " + change + " = true;\n  " + addRecord + "\n  " + oldValue + " = " + newValue + ";\n}\n" + notify + "\n");
@@ -62,6 +59,9 @@ System.register(["angular2/src/facade/lang", "angular2/src/facade/collection", "
   }
   function propertyReadTemplate(name, context, newValue) {
     return ("\n" + TEMP_LOCAL + " = " + UTIL + ".findContext(\"" + name + "\", " + context + ");\nif (" + TEMP_LOCAL + " instanceof ContextWithVariableBindings) {\n  " + newValue + " = " + TEMP_LOCAL + ".get('" + name + "');\n} else {\n  " + newValue + " = " + TEMP_LOCAL + "." + name + ";\n}\n");
+  }
+  function invokeMethodTemplate(name, args, context, newValue) {
+    return ("\n" + TEMP_LOCAL + " = " + UTIL + ".findContext(\"" + name + "\", " + context + ");\nif (" + TEMP_LOCAL + " instanceof ContextWithVariableBindings) {\n  " + newValue + " = " + TEMP_LOCAL + ".get('" + name + "').apply(null, [" + args + "]);\n} else {\n  " + newValue + " = " + context + "." + name + "(" + args + ");\n}\n");
   }
   function localDefinitionsTemplate(names) {
     return names.map((function(n) {
@@ -111,21 +111,18 @@ System.register(["angular2/src/facade/lang", "angular2/src/facade/collection", "
       RECORD_TYPE_INVOKE_CLOSURE = $__m.RECORD_TYPE_INVOKE_CLOSURE;
       RECORD_TYPE_PRIMITIVE_OP = $__m.RECORD_TYPE_PRIMITIVE_OP;
       RECORD_TYPE_KEYED_ACCESS = $__m.RECORD_TYPE_KEYED_ACCESS;
-      RECORD_TYPE_INVOKE_FORMATTER = $__m.RECORD_TYPE_INVOKE_FORMATTER;
-      RECORD_TYPE_STRUCTURAL_CHECK = $__m.RECORD_TYPE_STRUCTURAL_CHECK;
+      RECORD_TYPE_PIPE = $__m.RECORD_TYPE_PIPE;
       RECORD_TYPE_INTERPOLATE = $__m.RECORD_TYPE_INTERPOLATE;
-      ProtoChangeDetector = $__m.ProtoChangeDetector;
     }],
     execute: function() {
       ABSTRACT_CHANGE_DETECTOR = "AbstractChangeDetector";
       UTIL = "ChangeDetectionUtil";
       DISPATCHER_ACCESSOR = "this.dispatcher";
-      FORMATTERS_ACCESSOR = "this.formatters";
+      PIPE_REGISTRY_ACCESSOR = "this.pipeRegistry";
       PROTOS_ACCESSOR = "this.protos";
       CHANGE_LOCAL = "change";
       CHANGES_LOCAL = "changes";
       TEMP_LOCAL = "temp";
-      PIPE_REGISTRY_ACCESSOR = "this.pipeRegistry";
       Object.defineProperty(typeTemplate, "parameters", {get: function() {
           return [[assert.type.string], [assert.type.string], [assert.type.string], [assert.type.string]];
         }});
@@ -145,13 +142,16 @@ System.register(["angular2/src/facade/lang", "angular2/src/facade/collection", "
           return [[assert.type.number]];
         }});
       Object.defineProperty(pipeCheckTemplate, "parameters", {get: function() {
-          return [[assert.type.string], [assert.type.string], [assert.type.string], [assert.type.string], [assert.type.string], [assert.type.string]];
+          return [[assert.type.string], [assert.type.string], [assert.type.string], [assert.type.string], [assert.type.string], [assert.type.string], [assert.type.string]];
         }});
       Object.defineProperty(assignmentTemplate, "parameters", {get: function() {
           return [[assert.type.string], [assert.type.string]];
         }});
       Object.defineProperty(propertyReadTemplate, "parameters", {get: function() {
           return [[assert.type.string], [assert.type.string], [assert.type.string]];
+        }});
+      Object.defineProperty(invokeMethodTemplate, "parameters", {get: function() {
+          return [[assert.type.string], [assert.type.string], [assert.type.string], [assert.type.string]];
         }});
       Object.defineProperty(localDefinitionsTemplate, "parameters", {get: function() {
           return [[List]];
@@ -210,7 +210,7 @@ System.register(["angular2/src/facade/lang", "angular2/src/facade/collection", "
             var fields = [];
             fields = fields.concat(this.fieldNames);
             this.records.forEach((function(r) {
-              if (r.mode === RECORD_TYPE_STRUCTURAL_CHECK) {
+              if (r.mode === RECORD_TYPE_PIPE) {
                 fields.push($__0.pipeNames[r.selfIndex]);
               }
             }));
@@ -237,7 +237,7 @@ System.register(["angular2/src/facade/lang", "angular2/src/facade/collection", "
             return changeDefinitionsTemplate(this.changeNames);
           },
           genRecord: function(r) {
-            if (r.mode === RECORD_TYPE_STRUCTURAL_CHECK) {
+            if (r.mode === RECORD_TYPE_PIPE) {
               return this.genPipeCheck(r);
             } else {
               return this.genReferenceCheck(r);
@@ -251,7 +251,7 @@ System.register(["angular2/src/facade/lang", "angular2/src/facade/collection", "
             var change = this.changeNames[r.selfIndex];
             var addRecord = addSimpleChangeRecordTemplate(r.selfIndex - 1, oldValue, newValue);
             var notify = this.genNotify(r);
-            return pipeCheckTemplate(context, pipe, newValue, change, addRecord, notify);
+            return pipeCheckTemplate(context, pipe, r.name, newValue, change, addRecord, notify);
           },
           genReferenceCheck: function(r) {
             var newValue = this.localNames[r.selfIndex];
@@ -284,15 +284,17 @@ System.register(["angular2/src/facade/lang", "angular2/src/facade/collection", "
                   return assignmentTemplate(newValue, (context + "." + r.name));
                 }
               case RECORD_TYPE_INVOKE_METHOD:
-                return assignmentTemplate(newValue, (context + "." + r.name + "(" + args + ")"));
+                if (r.contextIndex == 0) {
+                  return invokeMethodTemplate(r.name, args, context, newValue);
+                } else {
+                  return assignmentTemplate(newValue, (context + "." + r.name + "(" + args + ")"));
+                }
               case RECORD_TYPE_INVOKE_CLOSURE:
                 return assignmentTemplate(newValue, (context + "(" + args + ")"));
               case RECORD_TYPE_PRIMITIVE_OP:
                 return assignmentTemplate(newValue, (UTIL + "." + r.name + "(" + args + ")"));
               case RECORD_TYPE_INTERPOLATE:
                 return assignmentTemplate(newValue, this.genInterpolation(r));
-              case RECORD_TYPE_INVOKE_FORMATTER:
-                return assignmentTemplate(newValue, (FORMATTERS_ACCESSOR + ".get(\"" + r.name + "\")(" + args + ")"));
               case RECORD_TYPE_KEYED_ACCESS:
                 var key = this.localNames[r.args[0]];
                 return assignmentTemplate(newValue, (context + "[" + key + "]"));

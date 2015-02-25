@@ -126,6 +126,13 @@ System.register([], function($__export) {
           equals: function(s, s2) {
             return s === s2;
           },
+          replace: function(s, from, replace) {
+            if (typeof(from) === "string") {
+              return s.replace(from, replace);
+            } else {
+              return s.replace(from.single, replace);
+            }
+          },
           replaceAll: function(s, from, replace) {
             return s.replace(from.multiple, replace);
           },
@@ -141,6 +148,7 @@ System.register([], function($__export) {
               for (var matches = [],
                   $__1 = 0; $__1 < arguments.length; $__1++)
                 matches[$__1] = arguments[$__1];
+              matches.splice(-2, 2);
               return cb(matches);
             });
           },
@@ -160,6 +168,9 @@ System.register([], function($__export) {
         }});
       Object.defineProperty(StringWrapper.equals, "parameters", {get: function() {
           return [[assert.type.string], [assert.type.string]];
+        }});
+      Object.defineProperty(StringWrapper.replace, "parameters", {get: function() {
+          return [[assert.type.string], [], [assert.type.string]];
         }});
       Object.defineProperty(StringWrapper.replaceAll, "parameters", {get: function() {
           return [[assert.type.string], [RegExp], [assert.type.string]];
@@ -204,6 +215,12 @@ System.register([], function($__export) {
       NumberWrapper = $__export("NumberWrapper", (function() {
         var NumberWrapper = function NumberWrapper() {};
         return ($traceurRuntime.createClass)(NumberWrapper, {}, {
+          toFixed: function(n, fractionDigits) {
+            return n.toFixed(fractionDigits);
+          },
+          equal: function(a, b) {
+            return a === b;
+          },
           parseIntAutoRadix: function(text) {
             var result = parseInt(text);
             if (isNaN(result)) {
@@ -242,6 +259,9 @@ System.register([], function($__export) {
           }
         });
       }()));
+      Object.defineProperty(NumberWrapper.toFixed, "parameters", {get: function() {
+          return [[assert.type.number], [int]];
+        }});
       Object.defineProperty(NumberWrapper.parseIntAutoRadix, "parameters", {get: function() {
           return [[assert.type.string]];
         }});
@@ -251,15 +271,16 @@ System.register([], function($__export) {
       Object.defineProperty(NumberWrapper.parseFloat, "parameters", {get: function() {
           return [[assert.type.string]];
         }});
+      RegExp = $__export("RegExp", RegExp);
       if (assertionsEnabled_) {
-        RegExp = assert.define('RegExp', function(obj) {
+        $__export("RegExp", RegExp = assert.define('RegExp', function(obj) {
           assert(obj).is(assert.structure({
             single: _global.RegExp,
             multiple: _global.RegExp
           }));
-        });
+        }));
       } else {
-        RegExp = {};
+        $__export("RegExp", RegExp = {});
       }
       RegExpWrapper = $__export("RegExpWrapper", (function() {
         var RegExpWrapper = function RegExpWrapper() {};

@@ -3,7 +3,6 @@ System.register(["angular2/src/facade/lang", "angular2/src/facade/dom", "angular
   var RegExpWrapper,
       StringWrapper,
       isPresent,
-      Node,
       DOM,
       Parser,
       CompileStep,
@@ -16,7 +15,6 @@ System.register(["angular2/src/facade/lang", "angular2/src/facade/dom", "angular
       StringWrapper = $__m.StringWrapper;
       isPresent = $__m.isPresent;
     }, function($__m) {
-      Node = $__m.Node;
       DOM = $__m.DOM;
     }, function($__m) {
       Parser = $__m.Parser;
@@ -40,16 +38,16 @@ System.register(["angular2/src/facade/lang", "angular2/src/facade/dom", "angular
               return ;
             }
             var element = current.element;
-            var childNodes = DOM.templateAwareRoot(element).childNodes;
+            var childNodes = DOM.childNodes(DOM.templateAwareRoot(element));
             for (var i = 0; i < childNodes.length; i++) {
               var node = childNodes[i];
-              if (node.nodeType === Node.TEXT_NODE) {
+              if (DOM.isTextNode(node)) {
                 this._parseTextNode(current, node, i);
               }
             }
           },
           _parseTextNode: function(pipelineElement, node, nodeIndex) {
-            var ast = this._parser.parseInterpolation(node.nodeValue, this._compilationUnit);
+            var ast = this._parser.parseInterpolation(DOM.nodeValue(node), this._compilationUnit);
             if (isPresent(ast)) {
               DOM.setText(node, ' ');
               pipelineElement.addTextNodeBinding(nodeIndex, ast);

@@ -1,7 +1,6 @@
 System.register(["./view", "angular2/src/facade/dom", "angular2/src/facade/collection", "angular2/src/facade/lang", "angular2/di", "angular2/src/core/compiler/element_injector", "angular2/src/core/events/event_manager"], function($__export) {
   "use strict";
-  var View,
-      ProtoView,
+  var viewModule,
       DOM,
       Node,
       Element,
@@ -10,15 +9,14 @@ System.register(["./view", "angular2/src/facade/dom", "angular2/src/facade/colle
       List,
       BaseException,
       Injector,
-      ElementInjector,
+      eiModule,
       isPresent,
       isBlank,
       EventManager,
       ViewContainer;
   return {
     setters: [function($__m) {
-      View = $__m.View;
-      ProtoView = $__m.ProtoView;
+      viewModule = $__m;
     }, function($__m) {
       DOM = $__m.DOM;
       Node = $__m.Node;
@@ -34,7 +32,7 @@ System.register(["./view", "angular2/src/facade/dom", "angular2/src/facade/colle
     }, function($__m) {
       Injector = $__m.Injector;
     }, function($__m) {
-      ElementInjector = $__m.ElementInjector;
+      eiModule = $__m;
     }, function($__m) {
       EventManager = $__m.EventManager;
     }],
@@ -160,10 +158,10 @@ System.register(["./view", "angular2/src/facade/dom", "angular2/src/facade/colle
         });
       }()));
       Object.defineProperty(ViewContainer, "parameters", {get: function() {
-          return [[View], [Element], [ProtoView], [ElementInjector], [EventManager], []];
+          return [[viewModule.View], [Element], [viewModule.ProtoView], [eiModule.ElementInjector], [EventManager], []];
         }});
       Object.defineProperty(ViewContainer.prototype.hydrate, "parameters", {get: function() {
-          return [[Injector], [ElementInjector]];
+          return [[Injector], [eiModule.ElementInjector]];
         }});
       Object.defineProperty(ViewContainer.prototype.get, "parameters", {get: function() {
           return [[assert.type.number]];

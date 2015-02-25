@@ -14,7 +14,10 @@ System.register(["angular2/src/facade/collection"], function($__export) {
       document,
       location,
       gc,
-      DOM;
+      CssRule,
+      CssKeyframesRule,
+      DOM,
+      CSSRuleWrapper;
   return {
     setters: [function($__m) {
       List = $__m.List;
@@ -37,6 +40,8 @@ System.register(["angular2/src/facade/collection"], function($__export) {
       }) : (function() {
         return null;
       }));
+      CssRule = $__export("CssRule", window.CSSRule);
+      CssKeyframesRule = $__export("CssKeyframesRule", window.CSSKeyframesRule);
       DOM = $__export("DOM", (function() {
         var DOM = function DOM() {};
         return ($traceurRuntime.createClass)(DOM, {}, {
@@ -68,6 +73,18 @@ System.register(["angular2/src/facade/collection"], function($__export) {
           },
           getOuterHTML: function(el) {
             return el.outerHTML;
+          },
+          nodeName: function(node) {
+            return node.nodeName;
+          },
+          nodeValue: function(node) {
+            return node.nodeValue;
+          },
+          type: function(node) {
+            return node.type;
+          },
+          content: function(node) {
+            return node.content;
           },
           firstChild: function(el) {
             return el.firstChild;
@@ -123,6 +140,18 @@ System.register(["angular2/src/facade/collection"], function($__export) {
           setText: function(el, value) {
             el.textContent = value;
           },
+          getValue: function(el) {
+            return el.value;
+          },
+          setValue: function(el, value) {
+            el.value = value;
+          },
+          getChecked: function(el) {
+            return el.checked;
+          },
+          setChecked: function(el, value) {
+            el.checked = value;
+          },
           createTemplate: function(html) {
             var t = document.createElement('template');
             t.innerHTML = html;
@@ -131,6 +160,10 @@ System.register(["angular2/src/facade/collection"], function($__export) {
           createElement: function(tagName) {
             var doc = arguments[1] !== (void 0) ? arguments[1] : document;
             return doc.createElement(tagName);
+          },
+          createTextNode: function(text) {
+            var doc = arguments[1] !== (void 0) ? arguments[1] : document;
+            return doc.createTextNode(text);
           },
           createScriptTag: function(attrName, attrValue) {
             var doc = arguments[2] !== (void 0) ? arguments[2] : document;
@@ -209,6 +242,18 @@ System.register(["angular2/src/facade/collection"], function($__export) {
           },
           elementMatches: function(n, selector) {
             return n instanceof Element && n.matches(selector);
+          },
+          isTemplateElement: function(el) {
+            return el instanceof TemplateElement;
+          },
+          isTextNode: function(node) {
+            return node.nodeType === Node.TEXT_NODE;
+          },
+          isElementNode: function(node) {
+            return node.nodeType === Node.ELEMENT_NODE;
+          },
+          importIntoDoc: function(node) {
+            return document.importNode(node, true);
           }
         });
       }()));
@@ -218,6 +263,18 @@ System.register(["angular2/src/facade/collection"], function($__export) {
       Object.defineProperty(DOM.querySelectorAll, "parameters", {get: function() {
           return [[], [assert.type.string]];
         }});
+      Object.defineProperty(DOM.nodeName, "parameters", {get: function() {
+          return [[Node]];
+        }});
+      Object.defineProperty(DOM.nodeValue, "parameters", {get: function() {
+          return [[Node]];
+        }});
+      Object.defineProperty(DOM.type, "parameters", {get: function() {
+          return [[Element]];
+        }});
+      Object.defineProperty(DOM.content, "parameters", {get: function() {
+          return [[TemplateElement]];
+        }});
       Object.defineProperty(DOM.remove, "parameters", {get: function() {
           return [[Element]];
         }});
@@ -226,6 +283,21 @@ System.register(["angular2/src/facade/collection"], function($__export) {
         }});
       Object.defineProperty(DOM.setText, "parameters", {get: function() {
           return [[], [assert.type.string]];
+        }});
+      Object.defineProperty(DOM.getValue, "parameters", {get: function() {
+          return [[Element]];
+        }});
+      Object.defineProperty(DOM.setValue, "parameters", {get: function() {
+          return [[Element], [assert.type.string]];
+        }});
+      Object.defineProperty(DOM.getChecked, "parameters", {get: function() {
+          return [[Element]];
+        }});
+      Object.defineProperty(DOM.setChecked, "parameters", {get: function() {
+          return [[Element], [assert.type.boolean]];
+        }});
+      Object.defineProperty(DOM.createTextNode, "parameters", {get: function() {
+          return [[assert.type.string], []];
         }});
       Object.defineProperty(DOM.createScriptTag, "parameters", {get: function() {
           return [[assert.type.string], [assert.type.string], []];
@@ -287,6 +359,35 @@ System.register(["angular2/src/facade/collection"], function($__export) {
       Object.defineProperty(DOM.elementMatches, "parameters", {get: function() {
           return [[], [assert.type.string]];
         }});
+      Object.defineProperty(DOM.isTemplateElement, "parameters", {get: function() {
+          return [[assert.type.any]];
+        }});
+      Object.defineProperty(DOM.isTextNode, "parameters", {get: function() {
+          return [[Node]];
+        }});
+      Object.defineProperty(DOM.isElementNode, "parameters", {get: function() {
+          return [[Node]];
+        }});
+      Object.defineProperty(DOM.importIntoDoc, "parameters", {get: function() {
+          return [[Node]];
+        }});
+      CSSRuleWrapper = $__export("CSSRuleWrapper", (function() {
+        var CSSRuleWrapper = function CSSRuleWrapper() {};
+        return ($traceurRuntime.createClass)(CSSRuleWrapper, {}, {
+          isPageRule: function(rule) {
+            return rule.type === CSSRule.PAGE_RULE;
+          },
+          isStyleRule: function(rule) {
+            return rule.type === CSSRule.STYLE_RULE;
+          },
+          isMediaRule: function(rule) {
+            return rule.type === CSSRule.MEDIA_RULE;
+          },
+          isKeyframesRule: function(rule) {
+            return rule.type === CSSRule.KEYFRAMES_RULE;
+          }
+        });
+      }()));
     }
   };
 });

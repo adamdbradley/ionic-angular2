@@ -13,13 +13,12 @@ System.register(["angular2/src/facade/lang", "angular2/src/facade/collection", "
       ContextWithVariableBindings,
       AST,
       EmptyExpr,
-      Structural,
       ImplicitReceiver,
       Chain,
       Conditional,
       AccessMember,
       KeyedAccess,
-      Formatter,
+      Pipe,
       LiteralPrimitive,
       LiteralArray,
       LiteralMap,
@@ -87,23 +86,6 @@ System.register(["angular2/src/facade/lang", "angular2/src/facade/collection", "
           visit: function(visitor) {}
         }, {}, $__super);
       }(AST)));
-      Structural = $__export("Structural", (function($__super) {
-        var Structural = function Structural(value) {
-          $traceurRuntime.superConstructor(Structural).call(this);
-          this.value = value;
-        };
-        return ($traceurRuntime.createClass)(Structural, {
-          eval: function(context) {
-            return value.eval(context);
-          },
-          visit: function(visitor) {
-            return visitor.visitStructural(this);
-          }
-        }, {}, $__super);
-      }(AST)));
-      Object.defineProperty(Structural, "parameters", {get: function() {
-          return [[AST]];
-        }});
       ImplicitReceiver = $__export("ImplicitReceiver", (function($__super) {
         var ImplicitReceiver = function ImplicitReceiver() {
           $traceurRuntime.superConstructor(ImplicitReceiver).apply(this, arguments);
@@ -232,19 +214,18 @@ System.register(["angular2/src/facade/lang", "angular2/src/facade/collection", "
       Object.defineProperty(KeyedAccess, "parameters", {get: function() {
           return [[AST], [AST]];
         }});
-      Formatter = $__export("Formatter", (function($__super) {
-        var Formatter = function Formatter(exp, name, args) {
-          $traceurRuntime.superConstructor(Formatter).call(this);
+      Pipe = $__export("Pipe", (function($__super) {
+        var Pipe = function Pipe(exp, name, args) {
+          $traceurRuntime.superConstructor(Pipe).call(this);
           this.exp = exp;
           this.name = name;
           this.args = args;
-          this.allArgs = ListWrapper.concat([exp], args);
         };
-        return ($traceurRuntime.createClass)(Formatter, {visit: function(visitor) {
-            return visitor.visitFormatter(this);
+        return ($traceurRuntime.createClass)(Pipe, {visit: function(visitor) {
+            return visitor.visitPipe(this);
           }}, {}, $__super);
       }(AST)));
-      Object.defineProperty(Formatter, "parameters", {get: function() {
+      Object.defineProperty(Pipe, "parameters", {get: function() {
           return [[AST], [assert.type.string], [List]];
         }});
       LiteralPrimitive = $__export("LiteralPrimitive", (function($__super) {
@@ -509,9 +490,8 @@ System.register(["angular2/src/facade/lang", "angular2/src/facade/collection", "
           visitAssignment: function(ast) {},
           visitBinary: function(ast) {},
           visitChain: function(ast) {},
-          visitStructural: function(ast) {},
           visitConditional: function(ast) {},
-          visitFormatter: function(ast) {},
+          visitPipe: function(ast) {},
           visitFunctionCall: function(ast) {},
           visitImplicitReceiver: function(ast) {},
           visitKeyedAccess: function(ast) {},
@@ -534,14 +514,11 @@ System.register(["angular2/src/facade/lang", "angular2/src/facade/collection", "
       Object.defineProperty(AstVisitor.prototype.visitChain, "parameters", {get: function() {
           return [[Chain]];
         }});
-      Object.defineProperty(AstVisitor.prototype.visitStructural, "parameters", {get: function() {
-          return [[Structural]];
-        }});
       Object.defineProperty(AstVisitor.prototype.visitConditional, "parameters", {get: function() {
           return [[Conditional]];
         }});
-      Object.defineProperty(AstVisitor.prototype.visitFormatter, "parameters", {get: function() {
-          return [[Formatter]];
+      Object.defineProperty(AstVisitor.prototype.visitPipe, "parameters", {get: function() {
+          return [[Pipe]];
         }});
       Object.defineProperty(AstVisitor.prototype.visitFunctionCall, "parameters", {get: function() {
           return [[FunctionCall]];

@@ -1,4 +1,4 @@
-System.register(["angular2/src/facade/lang", "angular2/src/facade/collection", "./parser/context_with_variable_bindings", "./abstract_change_detector", "./pipes/pipe_registry", "./change_detection_util", "./proto_change_detector", "./exceptions"], function($__export) {
+System.register(["angular2/src/facade/lang", "angular2/src/facade/collection", "./parser/context_with_variable_bindings", "./abstract_change_detector", "./pipes/pipe_registry", "./change_detection_util", "./proto_record", "./exceptions"], function($__export) {
   "use strict";
   var isPresent,
       isBlank,
@@ -22,10 +22,8 @@ System.register(["angular2/src/facade/lang", "angular2/src/facade/collection", "
       RECORD_TYPE_INVOKE_CLOSURE,
       RECORD_TYPE_PRIMITIVE_OP,
       RECORD_TYPE_KEYED_ACCESS,
-      RECORD_TYPE_INVOKE_FORMATTER,
-      RECORD_TYPE_STRUCTURAL_CHECK,
+      RECORD_TYPE_PIPE,
       RECORD_TYPE_INTERPOLATE,
-      ProtoChangeDetector,
       ExpressionChangedAfterItHasBeenChecked,
       ChangeDetectionError,
       DynamicChangeDetector,
@@ -69,20 +67,17 @@ System.register(["angular2/src/facade/lang", "angular2/src/facade/collection", "
       RECORD_TYPE_INVOKE_CLOSURE = $__m.RECORD_TYPE_INVOKE_CLOSURE;
       RECORD_TYPE_PRIMITIVE_OP = $__m.RECORD_TYPE_PRIMITIVE_OP;
       RECORD_TYPE_KEYED_ACCESS = $__m.RECORD_TYPE_KEYED_ACCESS;
-      RECORD_TYPE_INVOKE_FORMATTER = $__m.RECORD_TYPE_INVOKE_FORMATTER;
-      RECORD_TYPE_STRUCTURAL_CHECK = $__m.RECORD_TYPE_STRUCTURAL_CHECK;
+      RECORD_TYPE_PIPE = $__m.RECORD_TYPE_PIPE;
       RECORD_TYPE_INTERPOLATE = $__m.RECORD_TYPE_INTERPOLATE;
-      ProtoChangeDetector = $__m.ProtoChangeDetector;
     }, function($__m) {
       ExpressionChangedAfterItHasBeenChecked = $__m.ExpressionChangedAfterItHasBeenChecked;
       ChangeDetectionError = $__m.ChangeDetectionError;
     }],
     execute: function() {
       DynamicChangeDetector = $__export("DynamicChangeDetector", (function($__super) {
-        var DynamicChangeDetector = function DynamicChangeDetector(dispatcher, formatters, pipeRegistry, protoRecords) {
+        var DynamicChangeDetector = function DynamicChangeDetector(dispatcher, pipeRegistry, protoRecords) {
           $traceurRuntime.superConstructor(DynamicChangeDetector).call(this);
           this.dispatcher = dispatcher;
-          this.formatters = formatters;
           this.pipeRegistry = pipeRegistry;
           this.values = ListWrapper.createFixedSize(protoRecords.length + 1);
           this.pipes = ListWrapper.createFixedSize(protoRecords.length + 1);
@@ -118,7 +113,7 @@ System.register(["angular2/src/facade/lang", "angular2/src/facade/collection", "
           },
           _check: function(proto) {
             try {
-              if (proto.mode == RECORD_TYPE_STRUCTURAL_CHECK) {
+              if (proto.mode == RECORD_TYPE_PIPE) {
                 return this._pipeCheck(proto);
               } else {
                 return this._referenceCheck(proto);
@@ -164,8 +159,16 @@ System.register(["angular2/src/facade/lang", "angular2/src/facade/collection", "
                 }
                 break;
               case RECORD_TYPE_INVOKE_METHOD:
-                var methodInvoker = proto.funcOrValue;
-                return methodInvoker(this._readContext(proto), this._readArgs(proto));
+                var context = this._readContext(proto);
+                var args = this._readArgs(proto);
+                var c = ChangeDetectionUtil.findContext(proto.name, context);
+                if (c instanceof ContextWithVariableBindings) {
+                  return FunctionWrapper.apply(c.get(proto.name), args);
+                } else {
+                  var methodInvoker = proto.funcOrValue;
+                  return methodInvoker(c, args);
+                }
+                break;
               case RECORD_TYPE_KEYED_ACCESS:
                 var arg = this._readArgs(proto)[0];
                 return this._readContext(proto)[arg];
@@ -174,9 +177,6 @@ System.register(["angular2/src/facade/lang", "angular2/src/facade/collection", "
               case RECORD_TYPE_INTERPOLATE:
               case RECORD_TYPE_PRIMITIVE_OP:
                 return FunctionWrapper.apply(proto.funcOrValue, this._readArgs(proto));
-              case RECORD_TYPE_INVOKE_FORMATTER:
-                var formatter = MapWrapper.get(this.formatters, proto.funcOrValue);
-                return FunctionWrapper.apply(formatter, this._readArgs(proto));
               default:
                 throw new BaseException(("Unknown operation " + proto.mode));
             }
@@ -186,10 +186,10 @@ System.register(["angular2/src/facade/lang", "angular2/src/facade/collection", "
             var pipe = this._pipeFor(proto, context);
             var newValue = pipe.transform(context);
             if (!ChangeDetectionUtil.noChangeMarker(newValue)) {
+              var prevValue = this._readSelf(proto);
               this._writeSelf(proto, newValue);
               this._setChanged(proto, true);
               if (proto.lastInBinding) {
-                var prevValue = this._readSelf(proto);
                 return ChangeDetectionUtil.simpleChange(prevValue, newValue);
               } else {
                 return null;
@@ -204,7 +204,7 @@ System.register(["angular2/src/facade/lang", "angular2/src/facade/collection", "
             if (isPresent(storedPipe) && storedPipe.supports(context)) {
               return storedPipe;
             } else {
-              var pipe = this.pipeRegistry.get("[]", context);
+              var pipe = this.pipeRegistry.get(proto.name, context);
               this._writePipe(proto, pipe);
               return pipe;
             }
@@ -250,7 +250,7 @@ System.register(["angular2/src/facade/lang", "angular2/src/facade/collection", "
         }, {}, $__super);
       }(AbstractChangeDetector)));
       Object.defineProperty(DynamicChangeDetector, "parameters", {get: function() {
-          return [[assert.type.any], [Map], [PipeRegistry], [assert.genericType(List, ProtoRecord)]];
+          return [[assert.type.any], [PipeRegistry], [assert.genericType(List, ProtoRecord)]];
         }});
       Object.defineProperty(DynamicChangeDetector.prototype.setContext, "parameters", {get: function() {
           return [[assert.type.any]];

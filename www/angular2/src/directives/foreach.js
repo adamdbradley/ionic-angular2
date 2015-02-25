@@ -89,7 +89,7 @@ System.register(["angular2/src/core/annotations/annotations", "angular2/src/core
       Object.defineProperty(Foreach, "annotations", {get: function() {
           return [new Viewport({
             selector: '[foreach][in]',
-            bind: {'iterableChanges[]': 'in'}
+            bind: {'iterableChanges': 'in | iterableDiff'}
           })];
         }});
       Object.defineProperty(Foreach, "parameters", {get: function() {

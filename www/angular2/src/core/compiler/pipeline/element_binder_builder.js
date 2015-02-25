@@ -203,31 +203,36 @@ System.register(["angular2/src/facade/lang", "angular2/src/facade/dom", "angular
             }));
           },
           _bindDirectiveProperties: function(directives, compileElement) {
+            var $__0 = this;
             var protoView = compileElement.inheritedProtoView;
             for (var directiveIndex = 0; directiveIndex < directives.length; directiveIndex++) {
               var directive = ListWrapper.get(directives, directiveIndex);
               var annotation = directive.annotation;
               if (isBlank(annotation.bind))
                 continue;
-              var _this = this;
-              StringMapWrapper.forEach(annotation.bind, function(elProp, dirProp) {
-                var expression = isPresent(compileElement.propertyBindings) ? MapWrapper.get(compileElement.propertyBindings, elProp) : null;
-                if (isBlank(expression)) {
+              StringMapWrapper.forEach(annotation.bind, (function(bindConfig, dirProp) {
+                var bindConfigParts = $__0._splitBindConfig(bindConfig);
+                var elProp = bindConfigParts[0];
+                var pipes = ListWrapper.slice(bindConfigParts, 1, bindConfigParts.length);
+                var bindingAst = isPresent(compileElement.propertyBindings) ? MapWrapper.get(compileElement.propertyBindings, elProp) : null;
+                if (isBlank(bindingAst)) {
                   var attributeValue = MapWrapper.get(compileElement.attrs(), elProp);
                   if (isPresent(attributeValue)) {
-                    expression = _this._parser.wrapLiteralPrimitive(attributeValue, _this._compilationUnit);
-                  } else {
-                    throw new BaseException("No element binding found for property '" + elProp + "' which is required by directive '" + stringify(directive.type) + "'");
+                    bindingAst = $__0._parser.wrapLiteralPrimitive(attributeValue, $__0._compilationUnit);
                   }
                 }
-                var len = dirProp.length;
-                var dirBindingName = dirProp;
-                var isContentWatch = dirProp[len - 2] === '[' && dirProp[len - 1] === ']';
-                if (isContentWatch)
-                  dirBindingName = dirProp.substring(0, len - 2);
-                protoView.bindDirectiveProperty(directiveIndex, expression, dirBindingName, reflector.setter(dirBindingName), isContentWatch);
-              });
+                if (isPresent(bindingAst)) {
+                  var fullExpAstWithBindPipes = $__0._parser.addPipes(bindingAst, pipes);
+                  protoView.bindDirectiveProperty(directiveIndex, fullExpAstWithBindPipes, dirProp, reflector.setter(dirProp));
+                }
+              }));
             }
+          },
+          _splitBindConfig: function(bindConfig) {
+            var parts = StringWrapper.split(bindConfig, RegExpWrapper.create("\\|"));
+            return ListWrapper.map(parts, (function(s) {
+              return s.trim();
+            }));
           }
         }, {}, $__super);
       }(CompileStep)));
@@ -239,6 +244,9 @@ System.register(["angular2/src/facade/lang", "angular2/src/facade/dom", "angular
         }});
       Object.defineProperty(ElementBinderBuilder.prototype._bindDirectiveProperties, "parameters", {get: function() {
           return [[assert.genericType(List, DirectiveMetadata)], [CompileElement]];
+        }});
+      Object.defineProperty(ElementBinderBuilder.prototype._splitBindConfig, "parameters", {get: function() {
+          return [[assert.type.string]];
         }});
     }
   };

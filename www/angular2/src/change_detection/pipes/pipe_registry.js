@@ -31,12 +31,12 @@ System.register(["angular2/src/facade/collection", "angular2/src/facade/lang", "
               throw new BaseException(("Cannot find a pipe for type '" + type + "' object '" + obj + "'"));
             }
             var matchingConfig = ListWrapper.find(listOfConfigs, (function(pipeConfig) {
-              return pipeConfig["supports"](obj);
+              return pipeConfig.supports(obj);
             }));
             if (isBlank(matchingConfig)) {
               throw new BaseException(("Cannot find a pipe for type '" + type + "' object '" + obj + "'"));
             }
-            return matchingConfig["pipe"]();
+            return matchingConfig.create();
           }}, {});
       }()));
       Object.defineProperty(PipeRegistry.prototype.get, "parameters", {get: function() {

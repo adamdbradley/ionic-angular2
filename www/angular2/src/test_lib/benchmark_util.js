@@ -15,8 +15,9 @@ System.register(["angular2/src/facade/dom", "angular2/src/facade/lang"], functio
     var el;
     for (var i = 0; i < els.length; i++) {
       el = els[i];
-      if ((el.type !== 'radio' && el.type !== 'checkbox') || el.checked) {
-        value = el.value;
+      var type = DOM.type(el);
+      if ((type !== 'radio' && type !== 'checkbox') || DOM.getChecked(el)) {
+        value = DOM.getValue(el);
         break;
       }
     }

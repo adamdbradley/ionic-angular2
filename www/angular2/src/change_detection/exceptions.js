@@ -1,4 +1,4 @@
-System.register(["./proto_change_detector"], function($__export) {
+System.register(["./proto_record"], function($__export) {
   "use strict";
   var ProtoRecord,
       ExpressionChangedAfterItHasBeenChecked,

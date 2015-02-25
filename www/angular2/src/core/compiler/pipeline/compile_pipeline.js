@@ -4,7 +4,6 @@ System.register(["angular2/src/facade/lang", "angular2/src/facade/collection", "
       List,
       ListWrapper,
       Element,
-      Node,
       DOM,
       CompileElement,
       CompileControl,
@@ -18,7 +17,6 @@ System.register(["angular2/src/facade/lang", "angular2/src/facade/collection", "
       ListWrapper = $__m.ListWrapper;
     }, function($__m) {
       Element = $__m.Element;
-      Node = $__m.Node;
       DOM = $__m.DOM;
     }, function($__m) {
       CompileElement = $__m.CompileElement;
@@ -41,10 +39,10 @@ System.register(["angular2/src/facade/lang", "angular2/src/facade/collection", "
           _process: function(results, parent, current) {
             var additionalChildren = this._control.internalProcess(results, 0, parent, current);
             if (current.compileChildren) {
-              var node = DOM.templateAwareRoot(current.element).firstChild;
+              var node = DOM.firstChild(DOM.templateAwareRoot(current.element));
               while (isPresent(node)) {
                 var nextNode = DOM.nextSibling(node);
-                if (node.nodeType === Node.ELEMENT_NODE) {
+                if (DOM.isElementNode(node)) {
                   this._process(results, current, new CompileElement(node));
                 }
                 node = nextNode;

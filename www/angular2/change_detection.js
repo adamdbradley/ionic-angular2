@@ -4,13 +4,13 @@ System.register(["./src/change_detection/parser/ast", "./src/change_detection/pa
       DynamicProtoChangeDetector,
       JitProtoChangeDetector,
       PipeRegistry,
-      ArrayChanges,
-      NullPipe,
+      ArrayChangesFactory,
+      NullPipeFactory,
       ChangeDetection,
       defaultPipes,
-      _registry,
       DynamicChangeDetection,
       JitChangeDetection,
+      _registry,
       dynamicChangeDetection,
       jitChangeDetection;
   var $__exportNames = {
@@ -72,9 +72,9 @@ System.register(["./src/change_detection/parser/ast", "./src/change_detection/pa
           $__export(p, $__m[p]);
       });
     }, function($__m) {
-      ArrayChanges = $__m.ArrayChanges;
+      ArrayChangesFactory = $__m.ArrayChangesFactory;
     }, function($__m) {
-      NullPipe = $__m.NullPipe;
+      NullPipeFactory = $__m.NullPipeFactory;
     }],
     execute: function() {
       ChangeDetection = $__export("ChangeDetection", (function() {
@@ -86,42 +86,40 @@ System.register(["./src/change_detection/parser/ast", "./src/change_detection/pa
       Object.defineProperty(ChangeDetection.prototype.createProtoChangeDetector, "parameters", {get: function() {
           return [[assert.type.string]];
         }});
-      defaultPipes = $__export("defaultPipes", {"[]": [{
-          "supports": ArrayChanges.supportsObj,
-          "pipe": (function() {
-            return new ArrayChanges();
-          })
-        }, {
-          "supports": NullPipe.supportsObj,
-          "pipe": (function() {
-            return new NullPipe();
-          })
-        }]});
-      _registry = new PipeRegistry(defaultPipes);
+      defaultPipes = $__export("defaultPipes", {"iterableDiff": [new ArrayChangesFactory(), new NullPipeFactory()]});
       DynamicChangeDetection = $__export("DynamicChangeDetection", (function($__super) {
-        var DynamicChangeDetection = function DynamicChangeDetection() {
-          $traceurRuntime.superConstructor(DynamicChangeDetection).apply(this, arguments);
+        var DynamicChangeDetection = function DynamicChangeDetection(registry) {
+          $traceurRuntime.superConstructor(DynamicChangeDetection).call(this);
+          this.registry = registry;
         };
         return ($traceurRuntime.createClass)(DynamicChangeDetection, {createProtoChangeDetector: function(name) {
-            return new DynamicProtoChangeDetector(_registry);
+            return new DynamicProtoChangeDetector(this.registry);
           }}, {}, $__super);
       }(ChangeDetection)));
+      Object.defineProperty(DynamicChangeDetection, "parameters", {get: function() {
+          return [[PipeRegistry]];
+        }});
       Object.defineProperty(DynamicChangeDetection.prototype.createProtoChangeDetector, "parameters", {get: function() {
           return [[assert.type.string]];
         }});
       JitChangeDetection = $__export("JitChangeDetection", (function($__super) {
-        var JitChangeDetection = function JitChangeDetection() {
-          $traceurRuntime.superConstructor(JitChangeDetection).apply(this, arguments);
+        var JitChangeDetection = function JitChangeDetection(registry) {
+          $traceurRuntime.superConstructor(JitChangeDetection).call(this);
+          this.registry = registry;
         };
         return ($traceurRuntime.createClass)(JitChangeDetection, {createProtoChangeDetector: function(name) {
-            return new JitProtoChangeDetector(_registry);
+            return new JitProtoChangeDetector(this.registry);
           }}, {}, $__super);
       }(ChangeDetection)));
+      Object.defineProperty(JitChangeDetection, "parameters", {get: function() {
+          return [[PipeRegistry]];
+        }});
       Object.defineProperty(JitChangeDetection.prototype.createProtoChangeDetector, "parameters", {get: function() {
           return [[assert.type.string]];
         }});
-      dynamicChangeDetection = $__export("dynamicChangeDetection", new DynamicChangeDetection());
-      jitChangeDetection = $__export("jitChangeDetection", new JitChangeDetection());
+      _registry = new PipeRegistry(defaultPipes);
+      dynamicChangeDetection = $__export("dynamicChangeDetection", new DynamicChangeDetection(_registry));
+      jitChangeDetection = $__export("jitChangeDetection", new JitChangeDetection(_registry));
     }
   };
 });

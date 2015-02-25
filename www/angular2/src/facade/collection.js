@@ -265,6 +265,9 @@ System.register(["angular2/src/facade/lang"], function($__export) {
           },
           slice: function(l, from, to) {
             return l.slice(from, to);
+          },
+          sort: function(l, compareFn) {
+            l.sort(compareFn);
           }
         });
       }()));
@@ -303,6 +306,9 @@ System.register(["angular2/src/facade/lang"], function($__export) {
         }});
       Object.defineProperty(ListWrapper.slice, "parameters", {get: function() {
           return [[List], [int], [int]];
+        }});
+      Object.defineProperty(ListWrapper.sort, "parameters", {get: function() {
+          return [[List], [Function]];
         }});
       Object.defineProperty(iterateListLike, "parameters", {get: function() {
           return [[], [Function]];

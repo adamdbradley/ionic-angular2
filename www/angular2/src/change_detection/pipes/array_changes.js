@@ -12,6 +12,7 @@ System.register(["angular2/src/facade/collection", "angular2/src/facade/lang", "
       looseIdentical,
       NO_CHANGE,
       Pipe,
+      ArrayChangesFactory,
       ArrayChanges,
       CollectionChangeRecord,
       _DuplicateItemRecordList,
@@ -34,6 +35,17 @@ System.register(["angular2/src/facade/collection", "angular2/src/facade/lang", "
       Pipe = $__m.Pipe;
     }],
     execute: function() {
+      ArrayChangesFactory = $__export("ArrayChangesFactory", (function() {
+        var ArrayChangesFactory = function ArrayChangesFactory() {};
+        return ($traceurRuntime.createClass)(ArrayChangesFactory, {
+          supports: function(obj) {
+            return ArrayChanges.supportsObj(obj);
+          },
+          create: function() {
+            return new ArrayChanges();
+          }
+        }, {});
+      }()));
       ArrayChanges = $__export("ArrayChanges", (function($__super) {
         var ArrayChanges = function ArrayChanges() {
           $traceurRuntime.superConstructor(ArrayChanges).call(this);

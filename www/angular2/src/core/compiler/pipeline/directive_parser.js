@@ -5,7 +5,7 @@ System.register(["angular2/src/facade/lang", "angular2/src/facade/collection", "
       BaseException,
       List,
       MapWrapper,
-      TemplateElement,
+      DOM,
       SelectorMatcher,
       CssSelector,
       DirectiveMetadata,
@@ -24,7 +24,7 @@ System.register(["angular2/src/facade/lang", "angular2/src/facade/collection", "
       List = $__m.List;
       MapWrapper = $__m.MapWrapper;
     }, function($__m) {
-      TemplateElement = $__m.TemplateElement;
+      DOM = $__m.DOM;
     }, function($__m) {
       SelectorMatcher = $__m.SelectorMatcher;
       CssSelector = $__m.CssSelector;
@@ -54,7 +54,7 @@ System.register(["angular2/src/facade/lang", "angular2/src/facade/collection", "
             var attrs = current.attrs();
             var classList = current.classList();
             var cssSelector = new CssSelector();
-            cssSelector.setElement(current.element.nodeName);
+            cssSelector.setElement(DOM.nodeName(current.element));
             for (var i = 0; i < classList.length; i++) {
               cssSelector.addClassName(classList[i]);
             }
@@ -73,7 +73,7 @@ System.register(["angular2/src/facade/lang", "angular2/src/facade/collection", "
                 cssSelector.addAttribute(name, value);
               }));
             }
-            var isTemplateElement = current.element instanceof TemplateElement;
+            var isTemplateElement = DOM.isTemplateElement(current.element);
             this._selectorMatcher.match(cssSelector, (function(directive) {
               if (directive.annotation instanceof Viewport) {
                 if (!isTemplateElement) {

@@ -1,4 +1,4 @@
-System.register(["angular2/src/facade/lang", "angular2/src/facade/collection", "./proto_change_detector"], function($__export) {
+System.register(["angular2/src/facade/lang", "angular2/src/facade/collection", "./proto_record"], function($__export) {
   "use strict";
   var isPresent,
       List,

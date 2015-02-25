@@ -17,7 +17,8 @@ System.register(["angular2/src/facade/dom", "rtts_assert/rtts_assert"], function
       return n instanceof Element && n.shadowRoot;
     });
     var hasNodes = (function(n) {
-      return n.childNodes && n.childNodes.length > 0;
+      var children = DOM.childNodes(n);
+      return children && children.length > 0;
     });
     if (n instanceof Comment)
       return '';
@@ -25,7 +26,7 @@ System.register(["angular2/src/facade/dom", "rtts_assert/rtts_assert"], function
       return n.map((function(nn) {
         return elementText(nn);
       })).join("");
-    if (n instanceof Element && n.tagName == 'CONTENT')
+    if (n instanceof Element && DOM.tagName(n) == 'CONTENT')
       return elementText(Array.prototype.slice.apply(n.getDistributedNodes()));
     if (hasShadowRoot(n))
       return elementText(DOM.childNodesAsList(n.shadowRoot));

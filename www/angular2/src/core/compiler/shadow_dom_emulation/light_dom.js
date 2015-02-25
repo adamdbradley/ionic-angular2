@@ -127,7 +127,7 @@ System.register(["angular2/src/facade/dom", "angular2/src/facade/collection", "a
             var viewInj = this.lightDomView.elementInjectors;
             this.roots = ListWrapper.map(this.nodes, (function(n) {
               return new _Root(n, ListWrapper.find(viewInj, (function(inj) {
-                return inj.forElement(n);
+                return isPresent(inj) ? inj.forElement(n) : false;
               })));
             }));
             return this.roots;

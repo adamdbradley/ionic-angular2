@@ -33,7 +33,7 @@ System.register(["angular2/src/facade/lang", "angular2/src/facade/collection", "
       Binary,
       PrefixNot,
       Conditional,
-      Formatter,
+      Pipe,
       Assignment,
       Chain,
       KeyedAccess,
@@ -89,7 +89,7 @@ System.register(["angular2/src/facade/lang", "angular2/src/facade/collection", "
       Binary = $__m.Binary;
       PrefixNot = $__m.PrefixNot;
       Conditional = $__m.Conditional;
-      Formatter = $__m.Formatter;
+      Pipe = $__m.Pipe;
       Assignment = $__m.Assignment;
       Chain = $__m.Chain;
       KeyedAccess = $__m.KeyedAccess;
@@ -122,6 +122,14 @@ System.register(["angular2/src/facade/lang", "angular2/src/facade/collection", "
             var tokens = this._lexer.tokenize(input);
             var ast = new _ParseAST(input, location, tokens, this._reflector, false).parseChain();
             return new ASTWithSource(ast, input, location);
+          },
+          addPipes: function(bindingAst, pipes) {
+            if (ListWrapper.isEmpty(pipes))
+              return bindingAst;
+            var res = ListWrapper.reduce(pipes, (function(result, currentPipeName) {
+              return new Pipe(result, currentPipeName, []);
+            }), bindingAst.ast);
+            return new ASTWithSource(res, bindingAst.source, bindingAst.location);
           },
           parseTemplateBindings: function(input, location) {
             var tokens = this._lexer.tokenize(input);
@@ -159,6 +167,9 @@ System.register(["angular2/src/facade/lang", "angular2/src/facade/collection", "
         }});
       Object.defineProperty(Parser.prototype.parseBinding, "parameters", {get: function() {
           return [[assert.type.string], [assert.type.any]];
+        }});
+      Object.defineProperty(Parser.prototype.addPipes, "parameters", {get: function() {
+          return [[ASTWithSource], [assert.genericType(List, String)]];
         }});
       Object.defineProperty(Parser.prototype.parseTemplateBindings, "parameters", {get: function() {
           return [[assert.type.string], [assert.type.any]];
@@ -248,7 +259,7 @@ System.register(["angular2/src/facade/lang", "angular2/src/facade/collection", "
           parseChain: function() {
             var exprs = [];
             while (this.index < this.tokens.length) {
-              var expr = this.parseFormatter();
+              var expr = this.parsePipe();
               ListWrapper.push(exprs, expr);
               if (this.optionalCharacter($SEMICOLON)) {
                 if (!this.parseAction) {
@@ -265,18 +276,18 @@ System.register(["angular2/src/facade/lang", "angular2/src/facade/collection", "
               return exprs[0];
             return new Chain(exprs);
           },
-          parseFormatter: function() {
+          parsePipe: function() {
             var result = this.parseExpression();
             while (this.optionalOperator("|")) {
               if (this.parseAction) {
-                this.error("Cannot have a formatter in an action expression");
+                this.error("Cannot have a pipe in an action expression");
               }
               var name = this.expectIdentifierOrKeyword();
               var args = ListWrapper.create();
               while (this.optionalCharacter($COLON)) {
                 ListWrapper.push(args, this.parseExpression());
               }
-              result = new Formatter(result, name, args);
+              result = new Pipe(result, name, args);
             }
             return result;
           },
@@ -412,7 +423,7 @@ System.register(["angular2/src/facade/lang", "angular2/src/facade/collection", "
           },
           parsePrimary: function() {
             if (this.optionalCharacter($LPAREN)) {
-              var result = this.parseFormatter();
+              var result = this.parsePipe();
               this.expectCharacter($RPAREN);
               return result;
             } else if (this.next.isKeywordNull() || this.next.isKeywordUndefined()) {

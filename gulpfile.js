@@ -72,7 +72,7 @@ var CONFIG = {
   },
 
   angular2: {
-    src: 'node_modules/angular2',
+    src: 'node_modules/angular2/es6/prod',
     dest: 'www/angular2'
   }
 
@@ -107,7 +107,7 @@ gulp.task('deps', function() {
 
 
 gulp.task('build.angular.es5', function() {
-  var es5build = require('./node_modules/angular2/es5build');
+  var es5build = require('./node_modules/angular2/es6/prod/es5build');
   return es5build({
     src: CONFIG.angular2.src,
     dest: CONFIG.angular2.dest,

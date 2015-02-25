@@ -4,7 +4,7 @@ System.register(["angular2/src/facade/collection", "./view"], function($__export
       MapWrapper,
       StringMapWrapper,
       List,
-      View,
+      viewModule,
       ViewPool;
   return {
     setters: [function($__m) {
@@ -13,7 +13,7 @@ System.register(["angular2/src/facade/collection", "./view"], function($__export
       StringMapWrapper = $__m.StringMapWrapper;
       List = $__m.List;
     }, function($__m) {
-      View = $__m.View;
+      viewModule = $__m;
     }],
     execute: function() {
       ViewPool = $__export("ViewPool", (function() {
@@ -39,7 +39,7 @@ System.register(["angular2/src/facade/collection", "./view"], function($__export
           return [[assert.type.number]];
         }});
       Object.defineProperty(ViewPool.prototype.push, "parameters", {get: function() {
-          return [[View]];
+          return [[viewModule.View]];
         }});
     }
   };

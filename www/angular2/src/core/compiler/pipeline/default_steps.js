@@ -1,4 +1,4 @@
-System.register(["angular2/change_detection", "angular2/src/facade/collection", "./property_binding_parser", "./text_interpolation_parser", "./directive_parser", "./view_splitter", "./element_binding_marker", "./proto_view_builder", "./proto_element_injector_builder", "./element_binder_builder", "./shadow_dom_transformer", "angular2/src/core/compiler/directive_metadata", "angular2/src/core/compiler/shadow_dom_strategy", "angular2/src/facade/lang", "angular2/src/facade/dom"], function($__export) {
+System.register(["angular2/change_detection", "angular2/src/facade/collection", "./property_binding_parser", "./text_interpolation_parser", "./directive_parser", "./view_splitter", "./element_binding_marker", "./proto_view_builder", "./proto_element_injector_builder", "./element_binder_builder", "./shim_shadow_css", "./shim_shadow_dom", "angular2/src/core/compiler/directive_metadata", "angular2/src/core/compiler/shadow_dom_strategy", "angular2/src/facade/lang", "angular2/src/facade/dom"], function($__export) {
   "use strict";
   var ChangeDetection,
       Parser,
@@ -12,20 +12,25 @@ System.register(["angular2/change_detection", "angular2/src/facade/collection", 
       ProtoViewBuilder,
       ProtoElementInjectorBuilder,
       ElementBinderBuilder,
-      ShadowDomTransformer,
+      ShimShadowCss,
+      ShimShadowDom,
       DirectiveMetadata,
       ShadowDomStrategy,
-      NativeShadowDomStrategy,
+      EmulatedShadowDomStrategy,
       stringify,
       DOM;
   function createDefaultSteps(changeDetection, parser, compiledComponent, directives, shadowDomStrategy) {
     var compilationUnit = stringify(compiledComponent.type);
     var steps = [new ViewSplitter(parser, compilationUnit)];
-    if (!(shadowDomStrategy instanceof NativeShadowDomStrategy)) {
-      var step = new ShadowDomTransformer(compiledComponent, shadowDomStrategy, DOM.defaultDoc().head);
+    if (shadowDomStrategy instanceof EmulatedShadowDomStrategy) {
+      var step = new ShimShadowCss(compiledComponent, shadowDomStrategy, DOM.defaultDoc().head);
       ListWrapper.push(steps, step);
     }
     steps = ListWrapper.concat(steps, [new PropertyBindingParser(parser, compilationUnit), new DirectiveParser(directives), new TextInterpolationParser(parser, compilationUnit), new ElementBindingMarker(), new ProtoViewBuilder(changeDetection, shadowDomStrategy), new ProtoElementInjectorBuilder(), new ElementBinderBuilder(parser, compilationUnit)]);
+    if (shadowDomStrategy instanceof EmulatedShadowDomStrategy) {
+      var step = new ShimShadowDom(compiledComponent, shadowDomStrategy);
+      ListWrapper.push(steps, step);
+    }
     return steps;
   }
   $__export("createDefaultSteps", createDefaultSteps);
@@ -53,12 +58,14 @@ System.register(["angular2/change_detection", "angular2/src/facade/collection", 
     }, function($__m) {
       ElementBinderBuilder = $__m.ElementBinderBuilder;
     }, function($__m) {
-      ShadowDomTransformer = $__m.ShadowDomTransformer;
+      ShimShadowCss = $__m.ShimShadowCss;
+    }, function($__m) {
+      ShimShadowDom = $__m.ShimShadowDom;
     }, function($__m) {
       DirectiveMetadata = $__m.DirectiveMetadata;
     }, function($__m) {
       ShadowDomStrategy = $__m.ShadowDomStrategy;
-      NativeShadowDomStrategy = $__m.NativeShadowDomStrategy;
+      EmulatedShadowDomStrategy = $__m.EmulatedShadowDomStrategy;
     }, function($__m) {
       stringify = $__m.stringify;
     }, function($__m) {

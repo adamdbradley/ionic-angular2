@@ -1,4 +1,4 @@
-System.register(["angular2/src/facade/lang", "angular2/src/facade/dom", "angular2/src/facade/collection", "angular2/change_detection", "./compile_step", "./compile_element", "./compile_control", "angular2/src/change_detection/parser/lexer"], function($__export) {
+System.register(["angular2/src/facade/lang", "angular2/src/facade/dom", "angular2/src/facade/collection", "angular2/change_detection", "./compile_step", "./compile_element", "./compile_control"], function($__export) {
   "use strict";
   var isBlank,
       isPresent,
@@ -12,7 +12,6 @@ System.register(["angular2/src/facade/lang", "angular2/src/facade/dom", "angular
       CompileElement,
       CompileControl,
       StringWrapper,
-      $BANG,
       ViewSplitter;
   return {
     setters: [function($__m) {
@@ -34,8 +33,6 @@ System.register(["angular2/src/facade/lang", "angular2/src/facade/dom", "angular
       CompileElement = $__m.CompileElement;
     }, function($__m) {
       CompileControl = $__m.CompileControl;
-    }, function($__m) {
-      $BANG = $__m.$BANG;
     }],
     execute: function() {
       ViewSplitter = $__export("ViewSplitter", (function($__super) {
@@ -49,12 +46,12 @@ System.register(["angular2/src/facade/lang", "angular2/src/facade/dom", "angular
             if (isBlank(parent)) {
               current.isViewRoot = true;
             } else {
-              if (current.element instanceof TemplateElement) {
+              if (DOM.isTemplateElement(current.element)) {
                 if (!current.isViewRoot) {
                   var viewRoot = new CompileElement(DOM.createTemplate(''));
                   var currentElement = current.element;
                   var viewRootElement = viewRoot.element;
-                  this._moveChildNodes(currentElement.content, viewRootElement.content);
+                  this._moveChildNodes(DOM.content(currentElement), DOM.content(viewRootElement));
                   viewRoot.isViewRoot = true;
                   control.addChild(viewRoot);
                 }
@@ -63,7 +60,7 @@ System.register(["angular2/src/facade/lang", "angular2/src/facade/dom", "angular
                 var templateBindings = MapWrapper.get(attrs, 'template');
                 var hasTemplateBinding = isPresent(templateBindings);
                 MapWrapper.forEach(attrs, (function(attrValue, attrName) {
-                  if (StringWrapper.charCodeAt(attrName, 0) == $BANG) {
+                  if (StringWrapper.startsWith(attrName, '*')) {
                     var key = StringWrapper.substring(attrName, 1);
                     if (hasTemplateBinding) {
                       throw new BaseException("Only one template directive per element is allowed: " + (templateBindings + " and " + key + " cannot be used simultaneously!"));
@@ -79,14 +76,16 @@ System.register(["angular2/src/facade/lang", "angular2/src/facade/dom", "angular
                   this._parseTemplateBindings(templateBindings, newParent);
                   this._addParentElement(current.element, newParent.element);
                   control.addParent(newParent);
-                  current.element.remove();
+                  DOM.remove(current.element);
                 }
               }
             }
           },
           _moveChildNodes: function(source, target) {
-            while (isPresent(source.firstChild)) {
-              DOM.appendChild(target, source.firstChild);
+            var next = DOM.firstChild(source);
+            while (isPresent(next)) {
+              DOM.appendChild(target, next);
+              next = DOM.firstChild(source);
             }
           },
           _addParentElement: function(currentElement, newParentElement) {
@@ -102,7 +101,7 @@ System.register(["angular2/src/facade/lang", "angular2/src/facade/dom", "angular
               } else if (isPresent(binding.expression)) {
                 compileElement.addPropertyBinding(binding.key, binding.expression);
               } else {
-                compileElement.element.setAttribute(binding.key, '');
+                DOM.setAttribute(compileElement.element, binding.key, '');
               }
             }
           }

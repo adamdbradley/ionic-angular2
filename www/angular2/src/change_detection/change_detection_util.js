@@ -1,4 +1,4 @@
-System.register(["angular2/src/facade/lang", "angular2/src/facade/collection", "./parser/context_with_variable_bindings", "./proto_change_detector", "./exceptions", "./pipes/pipe", "./interfaces"], function($__export) {
+System.register(["angular2/src/facade/lang", "angular2/src/facade/collection", "./parser/context_with_variable_bindings", "./proto_record", "./exceptions", "./pipes/pipe", "./interfaces"], function($__export) {
   "use strict";
   var isPresent,
       isBlank,

@@ -5,7 +5,6 @@ System.register(["angular2/src/facade/dom", "angular2/src/facade/collection", "a
       Node,
       Text,
       DocumentFragment,
-      TemplateElement,
       ListWrapper,
       MapWrapper,
       StringMapWrapper,
@@ -39,7 +38,6 @@ System.register(["angular2/src/facade/dom", "angular2/src/facade/collection", "a
       EventManager,
       NG_BINDING_CLASS,
       NG_BINDING_CLASS_SELECTOR,
-      NO_FORMATTERS,
       VIEW_POOL_CAPACITY,
       VIEW_POOL_PREFILL,
       View,
@@ -56,7 +54,6 @@ System.register(["angular2/src/facade/dom", "angular2/src/facade/collection", "a
       Node = $__m.Node;
       Text = $__m.Text;
       DocumentFragment = $__m.DocumentFragment;
-      TemplateElement = $__m.TemplateElement;
     }, function($__m) {
       ListWrapper = $__m.ListWrapper;
       MapWrapper = $__m.MapWrapper;
@@ -107,14 +104,13 @@ System.register(["angular2/src/facade/dom", "angular2/src/facade/collection", "a
     execute: function() {
       NG_BINDING_CLASS = 'ng-binding';
       NG_BINDING_CLASS_SELECTOR = '.ng-binding';
-      NO_FORMATTERS = MapWrapper.create();
       VIEW_POOL_CAPACITY = 10000;
       VIEW_POOL_PREFILL = 0;
       View = $__export("View", (function() {
         var View = function View(proto, nodes, protoChangeDetector, protoContextLocals) {
           this.proto = proto;
           this.nodes = nodes;
-          this.changeDetector = protoChangeDetector.instantiate(this, NO_FORMATTERS);
+          this.changeDetector = protoChangeDetector.instantiate(this);
           this.elementInjectors = null;
           this.rootElementInjectors = null;
           this.textNodes = null;
@@ -307,7 +303,7 @@ System.register(["angular2/src/facade/dom", "angular2/src/facade/collection", "a
           this.elementsWithBindingCount = 0;
           this.instantiateInPlace = false;
           this.rootBindingOffset = (isPresent(this.element) && DOM.hasClass(this.element, NG_BINDING_CLASS)) ? 1 : 0;
-          this.isTemplateElement = this.element instanceof TemplateElement;
+          this.isTemplateElement = DOM.isTemplateElement(this.element);
           this.shadowDomStrategy = shadowDomStrategy;
           this._viewPool = new ViewPool(VIEW_POOL_CAPACITY);
         };
@@ -324,10 +320,10 @@ System.register(["angular2/src/facade/dom", "angular2/src/facade/collection", "a
             }
           },
           _instantiate: function(hostElementInjector, eventManager) {
-            var rootElementClone = this.instantiateInPlace ? this.element : DOM.clone(this.element);
+            var rootElementClone = this.instantiateInPlace ? this.element : DOM.importIntoDoc(this.element);
             var elementsWithBindingsDynamic;
             if (this.isTemplateElement) {
-              elementsWithBindingsDynamic = DOM.querySelectorAll(rootElementClone.content, NG_BINDING_CLASS_SELECTOR);
+              elementsWithBindingsDynamic = DOM.querySelectorAll(DOM.content(rootElementClone), NG_BINDING_CLASS_SELECTOR);
             } else {
               elementsWithBindingsDynamic = DOM.getElementsByClassName(rootElementClone, NG_BINDING_CLASS);
             }
@@ -337,7 +333,7 @@ System.register(["angular2/src/facade/dom", "angular2/src/facade/collection", "a
             }
             var viewNodes;
             if (this.isTemplateElement) {
-              var childNode = DOM.firstChild(rootElementClone.content);
+              var childNode = DOM.firstChild(DOM.content(rootElementClone));
               viewNodes = [];
               while (childNode != null) {
                 ListWrapper.push(viewNodes, childNode);
@@ -464,10 +460,10 @@ System.register(["angular2/src/facade/dom", "angular2/src/facade/collection", "a
             }
             MapWrapper.set(elBinder.events, eventName, expression);
           },
-          bindDirectiveProperty: function(directiveIndex, expression, setterName, setter, isContentWatch) {
+          bindDirectiveProperty: function(directiveIndex, expression, setterName, setter) {
             var bindingMemento = new DirectiveBindingMemento(this.elementBinders.length - 1, directiveIndex, setterName, setter);
             var directiveMemento = DirectiveMemento.get(bindingMemento);
-            this.protoChangeDetector.addAst(expression, bindingMemento, directiveMemento, isContentWatch);
+            this.protoChangeDetector.addAst(expression, bindingMemento, directiveMemento);
           }
         }, {
           buildInnerCallback: function(expr, view) {
@@ -482,11 +478,14 @@ System.register(["angular2/src/facade/dom", "angular2/src/facade/collection", "a
           },
           createRootProtoView: function(protoView, insertionElement, rootComponentAnnotatedType, protoChangeDetector, shadowDomStrategy) {
             DOM.addClass(insertionElement, NG_BINDING_CLASS);
+            var cmpType = rootComponentAnnotatedType.type;
             var rootProtoView = new ProtoView(insertionElement, protoChangeDetector, shadowDomStrategy);
             rootProtoView.instantiateInPlace = true;
-            var binder = rootProtoView.bindElement(new ProtoElementInjector(null, 0, [rootComponentAnnotatedType.type], true));
+            var binder = rootProtoView.bindElement(new ProtoElementInjector(null, 0, [cmpType], true));
             binder.componentDirective = rootComponentAnnotatedType;
             binder.nestedProtoView = protoView;
+            var shimComponent = shadowDomStrategy.getShimComponent(cmpType);
+            shimComponent.shimHostElement(insertionElement);
             return rootProtoView;
           }
         });
@@ -528,7 +527,7 @@ System.register(["angular2/src/facade/dom", "angular2/src/facade/collection", "a
           return [[assert.type.string], [AST]];
         }});
       Object.defineProperty(ProtoView.prototype.bindDirectiveProperty, "parameters", {get: function() {
-          return [[assert.type.number], [AST], [assert.type.string], [SetterFn], [assert.type.boolean]];
+          return [[assert.type.number], [AST], [assert.type.string], [SetterFn]];
         }});
       Object.defineProperty(ProtoView.createRootProtoView, "parameters", {get: function() {
           return [[ProtoView], [], [DirectiveMetadata], [ProtoChangeDetector], [ShadowDomStrategy]];

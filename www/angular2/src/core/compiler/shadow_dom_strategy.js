@@ -1,4 +1,4 @@
-System.register(["angular2/src/facade/lang", "angular2/src/facade/dom", "angular2/src/facade/collection", "./view", "./shadow_dom_emulation/content_tag", "./shadow_dom_emulation/light_dom"], function($__export) {
+System.register(["angular2/src/facade/lang", "angular2/src/facade/dom", "angular2/src/facade/collection", "./view", "./shadow_dom_emulation/content_tag", "./shadow_dom_emulation/light_dom", "./shadow_dom_emulation/shim_component"], function($__export) {
   "use strict";
   var Type,
       isBlank,
@@ -10,6 +10,9 @@ System.register(["angular2/src/facade/lang", "angular2/src/facade/dom", "angular
       View,
       Content,
       LightDom,
+      ShimComponent,
+      ShimEmulatedComponent,
+      ShimNativeComponent,
       ShadowDomStrategy,
       EmulatedShadowDomStrategy,
       NativeShadowDomStrategy;
@@ -35,6 +38,10 @@ System.register(["angular2/src/facade/lang", "angular2/src/facade/dom", "angular
       Content = $__m.Content;
     }, function($__m) {
       LightDom = $__m.LightDom;
+    }, function($__m) {
+      ShimComponent = $__m.ShimComponent;
+      ShimEmulatedComponent = $__m.ShimEmulatedComponent;
+      ShimNativeComponent = $__m.ShimNativeComponent;
     }],
     execute: function() {
       ShadowDomStrategy = $__export("ShadowDomStrategy", (function() {
@@ -45,11 +52,11 @@ System.register(["angular2/src/facade/lang", "angular2/src/facade/dom", "angular
           polyfillDirectives: function() {
             return null;
           },
-          shim: function() {
-            return false;
-          },
           extractStyles: function() {
             return false;
+          },
+          getShimComponent: function(component) {
+            return null;
           }
         }, {});
       }()));
@@ -58,6 +65,9 @@ System.register(["angular2/src/facade/lang", "angular2/src/facade/dom", "angular
         }});
       Object.defineProperty(ShadowDomStrategy.prototype.constructLightDom, "parameters", {get: function() {
           return [[View], [View], [Element]];
+        }});
+      Object.defineProperty(ShadowDomStrategy.prototype.getShimComponent, "parameters", {get: function() {
+          return [[Type]];
         }});
       EmulatedShadowDomStrategy = $__export("EmulatedShadowDomStrategy", (function($__super) {
         var EmulatedShadowDomStrategy = function EmulatedShadowDomStrategy() {
@@ -74,11 +84,11 @@ System.register(["angular2/src/facade/lang", "angular2/src/facade/dom", "angular
           polyfillDirectives: function() {
             return [Content];
           },
-          shim: function() {
-            return true;
-          },
           extractStyles: function() {
             return true;
+          },
+          getShimComponent: function(component) {
+            return new ShimEmulatedComponent(component);
           }
         }, {}, $__super);
       }(ShadowDomStrategy)));
@@ -87,6 +97,9 @@ System.register(["angular2/src/facade/lang", "angular2/src/facade/dom", "angular
         }});
       Object.defineProperty(EmulatedShadowDomStrategy.prototype.constructLightDom, "parameters", {get: function() {
           return [[View], [View], [Element]];
+        }});
+      Object.defineProperty(EmulatedShadowDomStrategy.prototype.getShimComponent, "parameters", {get: function() {
+          return [[Type]];
         }});
       NativeShadowDomStrategy = $__export("NativeShadowDomStrategy", (function($__super) {
         var NativeShadowDomStrategy = function NativeShadowDomStrategy() {
@@ -102,11 +115,11 @@ System.register(["angular2/src/facade/lang", "angular2/src/facade/dom", "angular
           polyfillDirectives: function() {
             return [];
           },
-          shim: function() {
-            return false;
-          },
           extractStyles: function() {
             return false;
+          },
+          getShimComponent: function(component) {
+            return new ShimNativeComponent(component);
           }
         }, {}, $__super);
       }(ShadowDomStrategy)));
@@ -115,6 +128,9 @@ System.register(["angular2/src/facade/lang", "angular2/src/facade/dom", "angular
         }});
       Object.defineProperty(NativeShadowDomStrategy.prototype.constructLightDom, "parameters", {get: function() {
           return [[View], [View], [Element]];
+        }});
+      Object.defineProperty(NativeShadowDomStrategy.prototype.getShimComponent, "parameters", {get: function() {
+          return [[Type]];
         }});
     }
   };
