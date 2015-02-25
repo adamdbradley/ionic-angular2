@@ -1,9 +1,9 @@
 var gulp = require('gulp');
 var sass = require('gulp-sass');
-var traceur = require('gulp-traceur');
 var gulpPlugins = require('gulp-load-plugins')();
 var argv = require('yargs').argv;
-
+var gulpTraceur = require('gulp-traceur');
+var runSequence = require('run-sequence');
 
 var CONFIG = {
 
@@ -23,13 +23,11 @@ var CONFIG = {
   },
 
   transpile: {
-    src: ['src/app/**/*.js', 'src/**/*.es6'],
-    dest: 'www/js/',
+    src: 'src/app/**/*.js',
+    dest: 'www/js',
     options: {
       debug: {
-        concat: false,
-        minify: false,
-        sourceMaps: true,
+        sourceMaps: false,
         annotations: true,
         types: true,
         script: false,
@@ -37,9 +35,7 @@ var CONFIG = {
         modules: 'instantiate'
       },
       release: {
-        concat: true,
-        minify: true,
-        sourceMaps: true,
+        sourceMaps: false,
         annotations: true,
         types: true,
         script: false,
@@ -51,7 +47,7 @@ var CONFIG = {
 
   templates: {
     src: 'src/app/**/*.html',
-    dest: 'www/',
+    dest: 'www',
     options: {
       debug: {
         inline: false
@@ -62,31 +58,61 @@ var CONFIG = {
     }
   },
 
-  lib: {
+  deps: {
     src: [
-      '/Users/adam/Git/angular/dist/js/prod/es5/**/*',
+      'node_modules/traceur/bin/traceur-runtime.js',
+      'node_modules/es6-module-loader/dist/es6-module-loader-sans-promises.src.js',
+      'node_modules/zone.js/long-stack-trace-zone.js',
+      'node_modules/zone.js/zone.js',
+      'node_modules/systemjs/dist/system.src.js',
+      'node_modules/systemjs/lib/extension-register.js',
+      'src/lib/snippets/runtime_paths.js'
     ],
-    dest: 'www/lib/',
-    options: {
-      debug: {
-        concat: false
-      },
-      release: {
-        concat: true
-      }
-    }
+    dest: 'www/lib/deps/'
+  },
+
+  angular2: {
+    src: 'node_modules/angular2',
+    dest: 'www/angular2'
   }
 
 };
 
 
-gulp.task('build', ['templates', 'sass', 'transpile', 'lib']);
+gulp.task('build', function(done) {
+  runSequence(
+    'lib',
+    'sass',
+    'transpile',
+    'templates',
+    done
+  );
+});
 
 
-gulp.task('watch', ['build'], function() {
+gulp.task('watch', function() {
   gulp.watch(CONFIG.sass.src, ['sass']);
   gulp.watch(CONFIG.transpile.src, ['transpile']);
   gulp.watch(CONFIG.templates.src, ['templates']);
+});
+
+
+gulp.task('lib', ['build.angular.es5', 'deps']);
+
+
+gulp.task('deps', function() {
+  return gulp.src(CONFIG.deps.src)
+         .pipe(gulp.dest(CONFIG.deps.dest));
+});
+
+
+gulp.task('build.angular.es5', function() {
+  var es5build = require('./node_modules/angular2/es5build');
+  return es5build({
+    src: CONFIG.angular2.src,
+    dest: CONFIG.angular2.dest,
+    modules: 'instantiate'
+  });
 });
 
 
@@ -100,7 +126,7 @@ gulp.task('sass', function(done) {
 
 gulp.task('transpile', function() {
   return gulp.src(CONFIG.transpile.src)
-         .pipe(traceur(options('transpile')))
+         .pipe(gulpTraceur(options('transpile')))
          .pipe(gulp.dest(CONFIG.transpile.dest));
 });
 
@@ -111,25 +137,20 @@ gulp.task('templates', function() {
 });
 
 
-gulp.task('lib', function(done) {
-  return gulp.src(CONFIG.lib.src)
-         .pipe(gulp.dest(CONFIG.lib.dest));
-});
-
-
-gulp.task('serve', ['build', 'watch'], function() {
+gulp.task('serve', ['watch'], function() {
   gulpPlugins.connect.server({
-    root: [__dirname + '/www'],
-    port: 8080,
-    livereload: false,
-    open: false
+    root: [__dirname + '/' + CONFIG.templates.dest],
+    port: (argv.port || argv.p || 8080),
+    livereload: !!(argv.livereload || argv.l),
+    open: !!(argv.browser || argv.b)
   })();
 })
 
+
 function options(type) {
-  return CONFIG[type].options[isRelease() ? 'release' : 'debug'];
+  return CONFIG[type].options[isProd() ? 'release' : 'debug'];
 }
 
-function isRelease() {
-  return !!(argv.release || argv.r);
+function isProd() {
+  return !!(argv.production || argv.prod);
 }

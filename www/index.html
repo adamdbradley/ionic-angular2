@@ -1,26 +1,26 @@
-<!doctype html>
-<html>
-<head>
+<!DOCTYPE html>
+<html ionic-app>
+  <meta charset="utf-8">
+  <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no">
+  <link href="/css/app.css" rel="stylesheet">
   <title>Hello Ionic 2.0</title>
-</head>
 <body>
 
-  <hello-app>
+  <ionic-app>
     Loading...
-  </hello-app>
+  </ionic-app>
 
   <script src="/lib/deps/traceur-runtime.js"></script>
-  <script src="/lib/rtts_assert/rtts_assert.js"></script>
-  <script src="/lib/deps/es6-module-loader-sans-promises.src.js"></script>
-  <script src="/lib/deps/zone.js"></script>
-  <script src="/lib/deps/long-stack-trace-zone.js"></script>
-  <script src="/lib/deps/system.src.js"></script>
-  <script src="/lib/deps/extension-register.js"></script>
-  <script src="/lib/deps/runtime_paths.js"></script>
-  <script>
+  <script src="/lib/deps/es6-module-loader-sans-promises.src.js" type="text/javascript"></script>
+  <script src="/lib/deps/zone.js" type="text/javascript"></script>
+  <script src="/lib/deps/long-stack-trace-zone.js" type="text/javascript"></script>
+  <script src="/lib/deps/system.src.js" type="text/javascript"></script>
+  <script src="/lib/deps/extension-register.js" type="text/javascript"></script>
+  <script src="/lib/deps/runtime_paths.js" type="text/javascript"></script>
+  <script type="text/javascript">
     System.import('js/index').then(function(m) {
       m.main();
-    }, console.log.bind(console));
+    }, console.log.bind(console))
   </script>
 
 </body>
